@@ -1,0 +1,18 @@
+digraph FSM {
+  rankdir=TB; dpi=200;
+  node [shape=ellipse, style=filled, fillcolor="#f2f2f2", fontname="DejaVu Sans", fontsize=13, width=1.6];
+  edge [fontname="DejaVu Sans", fontsize=11];
+  init [shape=point, width=0.12, fillcolor=black];
+  IDLE  [label="IDLE\nSS_N=1, SCLK=0\nbusy=0"];
+  START [label="START\nSS_N=0\nMOSI = MSB"];
+  TRANSFER [label="TRANSFER\nSCLK toggles\nevery CLK_DIV clk"];
+  STOP  [label="STOP\nSS_N=0, SCLK=0"];
+  init -> IDLE [label="rst"];
+  IDLE -> IDLE [label="start=0"];
+  IDLE -> START [label="start=1 /\nload_tx, clear_rx"];
+  START -> START [label="div_cnt<CLK_DIV-1"];
+  START -> TRANSFER [label="tick\n(півперіод\nустановлення)"];
+  TRANSFER -> TRANSFER [label="tick & SCLK=0: SCLK↑, sample MISO, bit_cnt+1\ntick & SCLK=1 & bit_cnt<8: SCLK↓, shift MOSI"];
+  TRANSFER -> STOP [label="tick & SCLK=1\n& bit_cnt=8 / SCLK↓"];
+  STOP -> IDLE [label="tick / SS_N=1,\nrx_data ← rx_word, done=1"];
+}
